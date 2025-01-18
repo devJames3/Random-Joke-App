@@ -2,7 +2,7 @@
 
 ![Random Joke Generator](./Random_Joke_Generator.png)
 
-### [DEMO](https://devjames3.github.io/random_joke_generator/)
+### [DEMO](https://devjames3.github.io/Random-Joke-App/)
 
 This is a fun and interactive app that generates a random joke every time you click the button. Built with HTML, CSS, and Vanilla JavaScript, it showcases event handling and API integration.
 
