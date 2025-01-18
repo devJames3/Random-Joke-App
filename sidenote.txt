@@ -1,0 +1,195 @@
+create a src folder in the root where all the source code goes
+create dist folder in the root where all the static assets are built to
+we can build these folders with react
+we also need a html plugin which can build the edited html into the dist folder
+
+terminal lines:
+ npm init -y
+ npm i -D webpack webpack-cli
+
+ to run webpack you need to create a script
+ go to package.json and change test to "build": "webpack --mode production"   
+ we added --mode production because we don't have a configuration file yet.
+
+ npm run build
+
+ its creates a main.js by default and basically just takes the both js codes and puts it in one code the browser can read
+
+ You also have to link the main.js to the html .
+
+ we can import and export our own module =, but can also use npm modules.
+ e.g generate random uuid numbers.
+  npm i uuid
+  you always have to run npm run build so as to see changes on the console when done since its an example can run, 
+  npm remove uuid
+
+  now back to project, we will create a webpack config.
+  in the root we create a file webpack.config.js  the config is gonna be in commonjs syntax:
+  const path = require('path');
+
+module.exports = {
+  mode: 'development',
+  entry: path.resolve(__dirname, 'src/index.js'),
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'bundle.js',
+  },
+};
+
+you can set multiple entry points:
+  const path = require('path');
+
+module.exports = {
+  mode: 'development',
+  entry: {
+    bundle: path.resolve(__dirname, 'src/index.js'),
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+};
+
+LOADERS:
+helps in loading images, css , sass etc :
+
+npm i -D sass style-loader css-loader sass-loader .
+got the sass source code form brad's repo and paste.
+import './styles/main.scss' to index.js
+these will make the style work when you run npm run build.
+const path = require('path');
+
+module.exports = {
+  // bundle configuration
+  mode: 'development',
+  entry: {
+    bundle: path.resolve(__dirname, 'src/index.js'),
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+  },
+  // Loaders configuration
+  module: {
+    rules: [
+      {
+        test: /\.scss$/,
+        use: ['style-loader', 'css-loader', 'sass-loader'],
+      },
+    ],
+  },
+};
+
+PLUGINS: this are more powerfull than loaders, e.g html plugin,
+this can build 
+npm i -D html-webpack-plugin
+add this at the top of webpack config file
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+and for this html plugin whenever we add a module we go under and add:
+plugins: [
+    new HtmlWebpackPlugin({
+      title: 'webpack App',
+      filename: 'index.html',
+    }),
+  ]
+  we can now delete dist folder and when we run npm run build, it creates it automatically with both index.html and bundle.js inside.
+
+  The problem is whenever you edit the html file after building and run npm run build it will get rid of the changes made.
+  So this is what to do:
+  update plugins like this below
+
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: 'webpack App',
+      filename: 'index.html',
+      template: 'src/template.html',
+    }),
+  ],
+  Also create template.html in the source folder and then edit the title to this : 
+  <title><%= htmlWebpackPlugin.options.title %></title> 
+This will automatically add the value of title in the htmlWebpackPlugin(e.g Webpack App) into the html title
+
+  before adding other html elements
+  Edit the template.html as needed then build to index.html by runnung npm  run build.
+
+  Search google for Caching webpack:
+  read webpack.config.js on the site look at output{....}
+  add this to webpack config : filename: '[name][contenthash].js', or just add [contenthash].js next to name.
+npm  run build again.
+and it automatically puts the bundle.js with some alpha numerics and also links same js with the html.
+
+SERVER:
+in package.json add: "dev": "webpack serve"
+then in terminal
+npm install -D webpack-dev-server
+npm run dev
+stop the server with ctrl C then go to web pack config file and add:
+devServer: {
+    static: {
+      directory: path.resolve(__dirname, 'dist'),
+    },
+    port: 3000,
+    open: true, //this will open the browser automatically when u run
+    hot: true,
+    compress: true,
+    historyApiFallback: true,
+  },
+
+  to prevent the bundler from creating a new bundle.js file anytime you do npm run build, do this: go to the bundle configuration and add
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name][contenthash].js',
+    clean: true,
+  },
+  when you run the server even when you dont have a dist file it still outputs same result, because its not running directly from the files in dist its running it from memory, that why it stil works
+
+  Another nice option is to add source maps: add to webpack congiguration
+
+   // For source maps
+  devtool: 'source-map',
+
+  SOME OTHER LOADERS:
+  if you want your site to be compactable with all browsers:
+  use babel:
+  npm i -D babel-loader @babel/core @babel/preset-env
+  go to the webpack config and add this under module rules:
+ {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babe/preset-env'],
+          },
+        },
+      },
+
+      Adding images in your javascript:
+      create a folder called asset, put image in the folder, then
+      add this to index.js:
+      import laughing from './assets/laughing.svg'
+      an error will occur when you try to run npm run build because it will ask for loader, but set this instead:
+      webpack comes with asset resource loader so do this :
+      add this under the babel loader cofig : 
+       {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i, //i is to make it case insentive//
+        type: 'asset/resource',
+      }
+      then in output add:
+      assetModuleFilename: '[name][ext]' // This will make the image to retain its name and not get renamed//
+
+      code your javaScript
+      to get the joke we will install :
+      npm i axios
+      go to generateJoke.js and import axios:
+      import axios from 'axios' and use it to fetch data from API.
+
+      BUNDLE ANALYZER PLUGIN:
+      Shows a screen of what your application is built from, what takes up the most space etc:
+
+      npm i -D webpack-bundle-analyzer
+      add at the top of webpack config :
+      const BundleAnalyzerPlugin =
+  require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+  add to plugin: 
+  new BundleAnalyzerPlugin(), //only nothing is passed anything into it
