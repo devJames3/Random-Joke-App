@@ -35,7 +35,7 @@ Each click fetches a new joke for endless laughter.
 
 ## Credits
 
-- Jokes are fetched from [Official Joke API](https://official-joke-api.appspot.com/) or another public jokes API.
+- Jokes are fetched from [Official Joke API](https://icanhazdadjoke.com) or another public jokes API.
 - Thanks to online resources and tutorials for inspiration and design ideas.
 
 ## Contributing
